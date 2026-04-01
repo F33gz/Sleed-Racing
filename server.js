@@ -126,6 +126,17 @@ io.on('connection', (socket) => {
     io.to(room.code).emit('lobby:update', { players: room.playerList() });
   });
 
+  // ── Player Rename ─────────────────────────────────────────────────────
+  socket.on('player:rename', (data) => {
+    const room = findRoomBySocket(socket.id);
+    if (!room) return;
+    const p = room.players.get(socket.id);
+    if (p) {
+      p.name = data?.name?.substring(0, 15) || 'Penguin';
+      io.to(room.code).emit('lobby:update', { players: room.playerList() });
+    }
+  });
+
   // ── Chat ──────────────────────────────────────────────────────────────
   socket.on('chat:message', (data) => {
     const room = findRoomBySocket(socket.id);

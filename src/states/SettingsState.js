@@ -43,12 +43,13 @@ export class SettingsState {
 
     this.modeBtn = new Button({
       label: this.getModeLabel(),
-      x: cx, y: sy, w: 260, h: 52,
+      x: cx, y: sy, w: 320, h: 52,
+      fontSize: 12,
       onClick: () => this.toggleMode(p),
     });
 
     this.backBtn = new Button({
-      label: '← Back', x: 70, y: p.height * 0.85, w: 100, h: 38, fontSize: 13,
+      label: 'BACK', x: 70, y: p.height * 0.85, w: 100, h: 38, fontSize: 13,
       onClick: () => {
         this.ctx.stateManager.setState('MENU', p);
       },
@@ -56,7 +57,7 @@ export class SettingsState {
   }
 
   getModeLabel() {
-    return CONFIG.CONTROL_MODE === 'body' ? 'Mode: Control Body (Kinect)' : 'Mode: Controls Six/Seven (Hands)';
+    return CONFIG.CONTROL_MODE === 'body' ? 'MODE KINECT BODY' : 'MODE HANDS CAMERA';
   }
 
   toggleMode(p) {
@@ -95,39 +96,39 @@ export class SettingsState {
     p.noStroke();
     p.fill(...CONFIG.CLR_TEXT);
     p.textFont(CONFIG.FONT_HEADER);
-    p.textSize(48);
+    p.textSize(40);
     p.textAlign(p.CENTER, p.CENTER);
-    p.text('Settings', p.width / 2, p.height * 0.2);
+    p.text('SETTINGS', p.width / 2, p.height * 0.2);
 
     // Settings Panel Background
-    const panelW = 400;
+    const panelW = 420;
     const panelH = 200;
     p.fill(20, 28, 48, 200);
     p.rect(p.width / 2 - panelW/2, p.height / 2 - panelH/2 + 20, panelW, panelH, 12);
 
     p.fill(...CONFIG.CLR_ACCENT);
     p.textFont(CONFIG.FONT_BODY);
-    p.textSize(16);
-    p.text('Choose steering control schema', p.width / 2, p.height * 0.36);
+    p.textSize(12);
+    p.text('CHOOSE STEERING CONTROL SCHEMA', p.width / 2, p.height * 0.36);
 
     // Description text for the active mode
     p.fill(160, 180, 220);
-    p.textSize(13);
+    p.textSize(9);
     p.textAlign(p.CENTER, p.TOP);
     let desc = '';
     if (CONFIG.CONTROL_MODE === 'body') {
-      desc = 'Steer by leaning your shoulders left and right.\nHold fists like reins for best results.';
+      desc = 'STEER BY LEANING SHOULDERS LEFT OR RIGHT\nHOLD FISTS LIKE REINS FOR BEST RESULTS';
     } else {
-      desc = 'Steer by raising one hand and lowering the other.\nWrists are tracked.';
+      desc = 'STEER BY RAISING ONE HAND AND LOWERING THE OTHER\nWRISTS ARE TRACKED';
     }
     p.text(desc, p.width / 2, p.height * 0.53);
 
     // Saved notification
     if (this.savedTextTimer > 0) {
       p.fill(80, 220, 120, p.map(this.savedTextTimer, 0, 30, 0, 255, true));
-      p.textSize(14);
+      p.textSize(12);
       p.textAlign(p.CENTER, p.CENTER);
-      p.text('Saved!', p.width / 2 + 180, p.height * 0.45);
+      p.text('SAVED', p.width / 2 + 190, p.height * 0.45);
     }
 
     // Buttons

@@ -12,6 +12,11 @@
   <!-- ml5.js v1 loaded via CDN for maximum Vite compatibility -->
   <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
   <style>
+    @font-face {
+      font-family: 'Bumbastika';
+      src: url('/assets/BUMBASTIKA.TTF') format('truetype');
+    }
+
     *,
     *::before,
     *::after {
@@ -22,11 +27,12 @@
 
     html,
     body {
+      margin: 0;
       overflow: hidden;
       width: 100%;
       height: 100%;
       background: #0a0e17;
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: 'Bumbastika', Arial, sans-serif;
     }
 
     #app {
@@ -42,24 +48,25 @@
     }
 
     /* Overlay inputs — positioned dynamically by JS */
-    .overlay-input {
-      position: fixed;
+    #join-code-input, #rename-input, #chat-msg-input {
+      position: absolute;
       display: none;
-      padding: 10px 14px;
-      border-radius: 8px;
+      padding: 0 8px;
+      border-radius: 6px;
       border: 2px solid #5a6fa0;
       background: #1a2035;
       color: #e0e6f0;
       font-size: 15px;
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: 'Bumbastika', Arial, sans-serif;
       text-align: center;
       outline: none;
       z-index: 20;
-      transition: border-color 0.2s;
+      box-sizing: border-box;
+      box-shadow: 0 0 10px rgba(120, 160, 240, 0.4);
     }
-
-    .overlay-input:focus {
-      border-color: #7b93d4;
+    
+    #chat-msg-input:focus, #join-code-input:focus, #rename-input:focus {
+      border-color: #78a0f0;
     }
 
     .overlay-input::placeholder {
@@ -73,6 +80,7 @@
   <!-- Dynamic text inputs used by Lobby chat & Join dialog -->
   <input id="join-code-input" class="overlay-input" type="text" placeholder="Enter Room Code" maxlength="8" />
   <input id="chat-msg-input" class="overlay-input" type="text" placeholder="Type a message..." maxlength="200" />
+  <input id="rename-input" class="overlay-input" type="text" placeholder="New Name" maxlength="10" />
   <script type="module" src="/src/main.js"></script>
 </body>
 

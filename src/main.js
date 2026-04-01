@@ -38,13 +38,22 @@ const sketch = (p) => {
 
   // ── p5 lifecycle ──────────────────────────────────────────────────
 
+  p.preload = () => {
+    // Preload the authentic Sled Racing / Club Penguin TTF font globally
+    const bumbastika = p.loadFont('/assets/BUMBASTIKA.TTF');
+    CONFIG.FONT_HEADER = bumbastika;
+    CONFIG.FONT_BODY = bumbastika;
+    CONFIG.FONT_NUMBERS = 'Arial'; // Safe reliable fallback for unrenderable numbers
+  };
+
   p.setup = () => {
     // Create canvas exactly at the original logical resolution
     const canvas = p.createCanvas(1000, 610);
     canvas.parent('app');
     setupCanvasScale();
 
-    p.textFont('Inter');
+    // Default to the preloaded Bumbastika font
+    p.textFont(CONFIG.FONT_HEADER);
     p.imageMode(p.CORNER);
     p.cursor(p.ARROW);
     lastTime = p.millis();

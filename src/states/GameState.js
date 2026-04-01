@@ -554,15 +554,17 @@ export class GameState {
     const ms = elapsed % 1000;
 
     p.fill(255);
-    p.textFont(CONFIG.FONT_BODY);
+    p.textFont(CONFIG.FONT_NUMBERS || 'Arial');
+    p.textStyle(p.BOLD);
     p.textSize(15);
     p.textAlign(p.LEFT, p.CENTER);
-    p.text(`⏱ ${mins}:${secs}:${ms}`, camX + 10, timerY + 14);
+    p.text(`TIME: ${mins}:${secs}.${ms}`, camX + 10, timerY + 14);
+    p.textStyle(p.NORMAL);
     p.pop();
   }
 
   drawCountdown(p) {
-    const labels = ['GO!', 'SET', 'READY'];
+    const labels = ['GO', 'SET', 'READY'];
     const label = labels[this.countdown - 1] || '';
     const isGo = this.countdown === 1;
 
@@ -577,7 +579,7 @@ export class GameState {
     p.strokeWeight(isGo ? 3 : 2);
     p.textAlign(p.CENTER, p.CENTER);
     p.textFont(CONFIG.FONT_BODY);
-    p.textSize(isGo ? 93 : 68);
+    p.textSize(isGo ? 65 : 45); // Shrunk for Bumbastika
     p.textStyle(p.BOLD);
     p.text(label, p.width / 2, p.height * 0.55);
     p.textStyle(p.NORMAL);
@@ -598,9 +600,9 @@ export class GameState {
     p.noStroke();
     p.textFont(CONFIG.FONT_BODY);
     p.textAlign(p.CENTER, p.TOP);
-    p.textSize(28);
+    p.textSize(20);
     p.textStyle(p.BOLD);
-    p.text('Leaderboard', p.width / 2, py + ph * 0.07);
+    p.text('LEADERBOARD', p.width / 2, py + ph * 0.07);
     p.textStyle(p.NORMAL);
 
     // Draw a line under header
@@ -611,23 +613,26 @@ export class GameState {
 
     // Placements
     const colors = [[255, 215, 0], [192, 192, 192], [140, 120, 83], [0, 128, 0]];
-    const labels = ['1st', '2nd', '3rd', '4th'];
+    const labels = ['FIRST', 'SECOND', 'THIRD', 'FOURTH'];
 
-    p.textSize(22);
+    p.textSize(12);
+    p.textAlign(p.LEFT, p.TOP);
     for (let i = 0; i < (this.results?.length || 0) && i < 4; i++) {
       const r = this.results[i];
       const ry = py + ph * 0.2 + i * ph * 0.13;
+      
       p.fill(...(colors[i] || [255, 255, 255]));
-      p.textAlign(p.LEFT, p.TOP);
+      p.textFont(CONFIG.FONT_BODY);
       p.text(`${labels[i]}`, px + 20, ry);
 
       p.fill(255);
-      p.textSize(17);
+      p.textFont(CONFIG.FONT_NUMBERS || 'Arial');
+      p.textStyle(p.BOLD);
       const timeStr = typeof r.time === 'number'
         ? `${r.time.toFixed(2)}s`
-        : r.time;
-      p.text(`${r.name} — ⏱ ${timeStr}`, px + 70, ry + 3);
-      p.textSize(22);
+        : r.time.toString();
+      p.text(`${r.name.toUpperCase()}  -  ${timeStr}`, px + 105, ry);
+      p.textStyle(p.NORMAL);
     }
 
     // Play Again button
@@ -642,9 +647,10 @@ export class GameState {
 
     p.noStroke();
     p.fill(255);
+    p.textFont(CONFIG.FONT_BODY); // Restore Bumbastika for the button
     p.textAlign(p.CENTER, p.CENTER);
-    p.textSize(24);
-    p.text('Play Again', btnX + btnW / 2, btnY + btnH / 2);
+    p.textSize(14);
+    p.text('PLAY AGAIN', btnX + btnW / 2, btnY + btnH / 2);
     p.pop();
 
     // Store button bounds for click detection

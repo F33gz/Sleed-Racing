@@ -46,14 +46,17 @@ export class LobbyState {
 
   enter(p, data = {}) {
     this._p = p;
-    this.isReady = false;
     this.isHost = data.isHost || false;
-    this.roomCode = data.roomCode || '...';
+    this.roomCode = data.roomCode || '---';
     this.playerName = data.playerName || 'Player';
-    this.serverConnected = false;
-    this.statusMessage = 'Connecting to server...';
+    this.isReady = false;
+    this.serverConnected = this.ctx.socketManager.socket?.connected;
+    this.statusMessage = '';
+    
+    this.showRenameInput = false;
+    this.renameInputEl = document.getElementById('rename-input');
 
-    this.snowflakes = Array.from({ length: 50 }, () => new Snowflake(p));
+    this.snowflakes = Array.from({ length: 40 }, () => new Snowflake(p));
     this.buildUI(p);
 
     // Activate chat HTML input
@@ -118,6 +121,7 @@ export class LobbyState {
   }
 
   exit(p) {
+    this.hideRenameBox();
     this.chatBox.deactivate();
     const sm = this.ctx.socketManager;
     sm.off('room:created');
@@ -151,7 +155,7 @@ export class LobbyState {
     });
 
     this.backBtn = new Button({
-      label: '← Back', x: 70, y: btnY, w: 100, h: 38, fontSize: 13,
+      label: 'BACK', x: 70, y: btnY, w: 100, h: 38, fontSize: 13,
       onClick: () => {
         this.ctx.socketManager.disconnect();
         this.ctx.stateManager.setState('MENU', p);
@@ -160,16 +164,72 @@ export class LobbyState {
 
     // Solo play button (shown when server unavailable)
     this.soloBtn = new Button({
-      label: '🎮 Play Solo', x: p.width / 2, y: p.height * 0.93, w: 160, h: 38, fontSize: 13,
+      label: 'PLAY SOLO', x: p.width / 2, y: p.height * 0.93, w: 160, h: 38, fontSize: 13,
       onClick: () => {
         this.ctx.stateManager.setState('GAME', p, { playerName: this.playerName });
       },
     });
+
+    this.renameBtn = new Button({
+      label: 'RENAME', x: 200, y: btnY, w: 120, h: 44, fontSize: 13,
+      onClick: () => this.showRenameBox(p, 200, btnY),
+    });
+  }
+
+  showRenameBox(p, btnX, btnY) {
+    if (!this.renameInputEl) return;
+    this.showRenameInput = true;
+    
+    const canvas = document.querySelector('canvas');
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const ratioX = rect.width / p.width;
+    const ratioY = rect.height / p.height;
+    
+    Object.assign(this.renameInputEl.style, {
+      display: 'block',
+      left: `${rect.left + (btnX - 60) * ratioX}px`, 
+      top: `${rect.top + (btnY - 22) * ratioY}px`,
+      width: `${120 * ratioX}px`, 
+      height: `${44 * ratioY}px`,
+      fontSize: `${Math.max(9, 11 * ratioY)}px`,
+      textAlign: 'center', 
+    });
+    this.renameInputEl.value = this.playerName;
+    this.renameInputEl.focus();
+
+    this.renameInputEl.onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        const newName = this.renameInputEl.value.trim().substring(0, 10).replace(/[^a-zA-Z0-9 ]/g, "").toUpperCase();
+        if (newName.length > 0) {
+          this.playerName = newName;
+          
+          if (this.playerList && this.playerList.players) {
+              const myEntry = this.playerList.players.find(pl => pl.id === this.ctx.socketManager.socket?.id);
+              if (myEntry) myEntry.name = newName;
+          }
+          
+          this.ctx.socketManager.emit('player:rename', { name: newName });
+          localStorage.setItem('penguinName', newName);
+        }
+        this.hideRenameBox();
+      } else if (e.key === 'Escape') {
+        this.hideRenameBox();
+      }
+    };
+  }
+  
+  hideRenameBox() {
+    this.showRenameInput = false;
+    if (this.renameInputEl) {
+      this.renameInputEl.style.display = 'none';
+      this.renameInputEl.onkeydown = null;
+    }
   }
 
   toggleReady() {
     this.isReady = !this.isReady;
-    this.readyBtn.label = this.isReady ? '✓ Ready!' : 'Ready';
+    this.readyBtn.label = this.isReady ? 'READY' : 'READY';
     this.ctx.socketManager.emit('player:ready', { ready: this.isReady });
   }
 
@@ -183,6 +243,7 @@ export class LobbyState {
     for (const s of this.snowflakes) s.update(p);
     this.readyBtn.update(p);
     this.backBtn.update(p);
+    this.renameBtn.update(p);
     if (this.isHost) this.startBtn.update(p);
     this.soloBtn.update(p);
   }
@@ -202,23 +263,23 @@ export class LobbyState {
     p.textFont(CONFIG.FONT_HEADER);
     p.textSize(32);
     p.textAlign(p.CENTER, p.CENTER);
-    p.text('Lobby', p.width / 2, p.height * 0.05);
+    p.text('LOBBY', p.width / 2, p.height * 0.05);
 
     // Room code (big and prominent)
     p.fill(...CONFIG.CLR_ACCENT_GLOW);
     p.textFont(CONFIG.FONT_BODY);
     p.textSize(22);
-    p.text(`Room Code:  ${this.roomCode}`, p.width / 2, p.height * 0.105);
+    p.text(`ROOM CODE ${this.roomCode}`, p.width / 2, p.height * 0.105);
 
     // Connection status
     if (this.statusMessage) {
       p.fill(255, 200, 80);
       p.textSize(12);
-      p.text(this.statusMessage, p.width / 2, p.height * 0.15);
+      p.text(this.statusMessage.replace(/[\(\):—✓]/g, '').toUpperCase(), p.width / 2, p.height * 0.15);
     } else {
       p.fill(80, 220, 120);
       p.textSize(12);
-      p.text(`✓ Connected — ${this.playerList?.players?.length || 0} player(s)`, p.width / 2, p.height * 0.15);
+      p.text(`CONNECTED   ${this.playerList?.players?.length || 0} PLAYERS`, p.width / 2, p.height * 0.15);
     }
 
     // Panels
@@ -228,6 +289,7 @@ export class LobbyState {
     // Buttons
     this.readyBtn.draw(p);
     this.backBtn.draw(p);
+    this.renameBtn.draw(p);
     if (this.isHost && this.serverConnected) this.startBtn.draw(p);
 
     // Solo play (always available as fallback)
@@ -239,6 +301,7 @@ export class LobbyState {
   mousePressed(p) {
     this.readyBtn.checkClick();
     this.backBtn.checkClick();
+    this.renameBtn.checkClick();
     if (this.isHost && this.serverConnected) this.startBtn.checkClick();
     if (!this.serverConnected) this.soloBtn.checkClick();
   }
@@ -252,5 +315,13 @@ export class LobbyState {
 
   onResize(p, w, h) {
     this.buildUI(p);
+    this.hideRenameBox();
+    const canvas = document.querySelector('canvas');
+    if (this.chatBox && canvas) {
+      this.chatBox.activate(canvas, (text) => {
+        this.ctx.socketManager.emit('chat:message', { text });
+        this.chatBox.addMessage(this.playerName, text);
+      });
+    }
   }
 }

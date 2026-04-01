@@ -28,14 +28,20 @@ export class ChatBox {
     if (!this.inputEl) return;
 
     const rect = canvas.getBoundingClientRect();
-    const inputH = 34;
+    const ratioX = rect.width / 1000;
+    const ratioY = rect.height / 610;
+    
+    const inputH = 34 * ratioY;
 
     Object.assign(this.inputEl.style, {
       display: 'block',
-      left: `${rect.left + this.x + 6}px`,
-      top: `${rect.top + this.y + this.h - inputH - 6}px`,
-      width: `${this.w - 12}px`,
+      left: `${rect.left + (this.x + 6) * ratioX}px`,
+      top: `${rect.top + (this.y + this.h - 6) * ratioY - inputH}px`,
+      width: `${(this.w - 12) * ratioX}px`,
       height: `${inputH}px`,
+      fontSize: `${Math.max(10, 13 * ratioY)}px`,
+      padding: '0 8px',
+      boxSizing: 'border-box',
     });
 
     this.inputEl.value = '';
