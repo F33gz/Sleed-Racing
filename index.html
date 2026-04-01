@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Sleed Racing — A multiplayer sled racing game inspired by Club Penguin, controlled with hand gestures." />
+  <title>Sleed Racing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- ml5.js v1 loaded via CDN for maximum Vite compatibility -->
+  <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      background: #0a0e17;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    #app {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    /* Overlay inputs — positioned dynamically by JS */
+    .overlay-input {
+      position: fixed;
+      display: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 2px solid #5a6fa0;
+      background: #1a2035;
+      color: #e0e6f0;
+      font-size: 15px;
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: center;
+      outline: none;
+      z-index: 20;
+      transition: border-color 0.2s;
+    }
+
+    .overlay-input:focus {
+      border-color: #7b93d4;
+    }
+
+    .overlay-input::placeholder {
+      color: #5a6a8a;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app"></div>
+  <!-- Dynamic text inputs used by Lobby chat & Join dialog -->
+  <input id="join-code-input" class="overlay-input" type="text" placeholder="Enter Room Code" maxlength="8" />
+  <input id="chat-msg-input" class="overlay-input" type="text" placeholder="Type a message..." maxlength="200" />
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
