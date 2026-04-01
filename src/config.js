@@ -72,7 +72,7 @@ export const CONFIG = {
   FINISH_DECAY_MAX: 0.935,          // Max deceleration after finish line
 
   // ── Network ──────────────────────────────────────────────────────────
-  SERVER_URL: 'http://localhost:3000',
+  SERVER_URL: `http://${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:3000`,
   POSITION_SYNC_RATE: 50,
 
   // ── UI / Fonts ───────────────────────────────────────────────────────

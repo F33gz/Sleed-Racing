@@ -58,11 +58,15 @@ export class GameState {
   // ── Lifecycle ──────────────────────────────────────────────────────
 
   enter(p, data = {}) {
+    // Session metadata for "Play Again" persistence
+    this.isHost = data.isHost || false;
+    this.roomCode = data.roomCode || '---';
+
     // Create track
     this.track = new Track();
     this.track.preloadAssets(p);
 
-    // Pick a random map or use provided
+    // Pick a map
     const mapIdx = data.mapIndex ?? Math.floor(Math.random() * 4);
     this.track.loadMap(mapIdx);
 
@@ -664,14 +668,22 @@ export class GameState {
       const b = this._playAgainBtn;
       if (p.mouseX >= b.x && p.mouseX <= b.x + b.w &&
           p.mouseY >= b.y && p.mouseY <= b.y + b.h) {
-        this.ctx.stateManager.setState('MENU', p);
+        this.ctx.stateManager.setState('LOBBY', p, { 
+          isHost: this.isHost, 
+          roomCode: this.roomCode, 
+          playerName: this.local.name 
+        });
       }
     }
   }
 
   keyPressed(p, kc) {
     if (kc === 27 && this.finished) {
-      this.ctx.stateManager.setState('MENU', p);
+      this.ctx.stateManager.setState('LOBBY', p, { 
+        isHost: this.isHost, 
+        roomCode: this.roomCode, 
+        playerName: this.local.name 
+      });
     }
   }
 
