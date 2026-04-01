@@ -668,10 +668,13 @@ export class GameState {
       const b = this._playAgainBtn;
       if (p.mouseX >= b.x && p.mouseX <= b.x + b.w &&
           p.mouseY >= b.y && p.mouseY <= b.y + b.h) {
-        this.ctx.stateManager.setState('LOBBY', p, { 
-          isHost: this.isHost, 
-          roomCode: this.roomCode, 
-          playerName: this.local.name 
+        if (this.isHost) {
+          this.ctx.socketManager.emit('game:reset');
+        }
+        this.ctx.stateManager.setState('LOBBY', p, {
+          isHost: this.isHost,
+          roomCode: this.roomCode,
+          playerName: this.local.name,
         });
       }
     }
@@ -679,10 +682,13 @@ export class GameState {
 
   keyPressed(p, kc) {
     if (kc === 27 && this.finished) {
-      this.ctx.stateManager.setState('LOBBY', p, { 
-        isHost: this.isHost, 
-        roomCode: this.roomCode, 
-        playerName: this.local.name 
+      if (this.isHost) {
+        this.ctx.socketManager.emit('game:reset');
+      }
+      this.ctx.stateManager.setState('LOBBY', p, {
+        isHost: this.isHost,
+        roomCode: this.roomCode,
+        playerName: this.local.name,
       });
     }
   }

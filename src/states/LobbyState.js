@@ -92,6 +92,10 @@ export class LobbyState {
     sm.on('lobby:update', (data) => {
       this.serverConnected = true;
       this.statusMessage = '';
+      if (data.roomCode) this.roomCode = data.roomCode;
+      if (data.hostId && data.hostId === this.ctx.socketManager.socket?.id) {
+        this.isHost = true;
+      }
       this.playerList.setPlayers(data.players);
     });
 
@@ -106,6 +110,8 @@ export class LobbyState {
         mapIndex: payload.mapIndex,
         players: payload.players,
         playerName: this.playerName,
+        roomCode: payload.roomCode || this.roomCode,
+        isHost: payload.hostId ? payload.hostId === this.ctx.socketManager.socket?.id : this.isHost,
       });
     });
 
@@ -115,6 +121,9 @@ export class LobbyState {
         this.statusMessage = 'Server not found. Start server with: npm run server';
       }
     }, 3000);
+
+    // Refresh lobby state (player list + code) when entering/re-entering
+    this.ctx.socketManager.emit('lobby:request');
 
     // Seed the player list with ourselves
     this.playerList.setPlayers([{ id: 'self', name: this.playerName, ready: false }]);

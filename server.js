@@ -105,7 +105,7 @@ io.on('connection', (socket) => {
     socket.join(code);
 
     socket.emit('room:created', { roomCode: code });
-    io.to(code).emit('lobby:update', { players: room.playerList() });
+    io.to(code).emit('lobby:update', { players: room.playerList(), roomCode: room.code, hostId: room.hostId });
     console.log(`[Room] ${code} created by ${socket.id}`);
   });
 
@@ -131,7 +131,7 @@ io.on('connection', (socket) => {
     socket.join(code);
 
     socket.emit('room:joined', { roomCode: code });
-    io.to(code).emit('lobby:update', { players: room.playerList() });
+    io.to(code).emit('lobby:update', { players: room.playerList(), roomCode: room.code, hostId: room.hostId });
     console.log(`[Room] ${socket.id} joined ${code} (${room.players.size} players)`);
   });
 
@@ -141,7 +141,7 @@ io.on('connection', (socket) => {
     if (!room) return;
 
     room.setReady(socket.id, data?.ready ?? true);
-    io.to(room.code).emit('lobby:update', { players: room.playerList() });
+    io.to(room.code).emit('lobby:update', { players: room.playerList(), roomCode: room.code, hostId: room.hostId });
   });
 
   // ── Player Rename ─────────────────────────────────────────────────────
@@ -151,7 +151,7 @@ io.on('connection', (socket) => {
     const p = room.players.get(socket.id);
     if (p) {
       p.name = data?.name?.substring(0, 15) || 'Penguin';
-      io.to(room.code).emit('lobby:update', { players: room.playerList() });
+      io.to(room.code).emit('lobby:update', { players: room.playerList(), roomCode: room.code, hostId: room.hostId });
     }
   });
 
@@ -180,8 +180,24 @@ io.on('connection', (socket) => {
     io.to(room.code).emit('game:start', {
       mapIndex: room.mapIndex,
       players: room.playerList(),
+      roomCode: room.code,
+      hostId: room.hostId,
     });
     console.log(`[Game] Room ${room.code} started — map ${room.mapIndex}`);
+  });
+
+  // ── Reset game for replay (host only) ─────────────────────────────────
+  socket.on('game:reset', () => {
+    const room = findRoomBySocket(socket.id);
+    if (!room || room.hostId !== socket.id) return;
+
+    room.started = false;
+    room.mapIndex = -1;
+    room.startTime = 0;
+    room.finishTimes.clear();
+    for (const p of room.players.values()) p.ready = false;
+
+    io.to(room.code).emit('lobby:update', { players: room.playerList(), roomCode: room.code, hostId: room.hostId });
   });
 
   // ── In-game position relay (volatile for performance) ─────────────────
@@ -234,12 +250,19 @@ io.on('connection', (socket) => {
     }
   });
 
+  // ── Lobby state request (for reconnect / play again) ───────────────────
+  socket.on('lobby:request', () => {
+    const room = findRoomBySocket(socket.id);
+    if (!room) return;
+    socket.emit('lobby:update', { players: room.playerList(), roomCode: room.code, hostId: room.hostId });
+  });
+
   // ── Disconnect ────────────────────────────────────────────────────────
   socket.on('disconnect', () => {
     const room = findRoomBySocket(socket.id);
     if (room) {
       room.removePlayer(socket.id);
-      io.to(room.code).emit('lobby:update', { players: room.playerList() });
+      io.to(room.code).emit('lobby:update', { players: room.playerList(), roomCode: room.code, hostId: room.hostId });
 
       // Clean up empty rooms
       if (room.players.size === 0) {
