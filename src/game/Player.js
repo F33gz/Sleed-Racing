@@ -67,17 +67,17 @@ export class Player {
   }
 
   preloadAssets(p) {
-    this.sprites.default = p.loadImage('/assets/Penguin/default.png');
-    this.sprites.left    = p.loadImage('/assets/Penguin/left.png');
-    this.sprites.right   = p.loadImage('/assets/Penguin/right.png');
-    this.sprites.back    = p.loadImage('/assets/Penguin/back.png');
-    this.sprites.crashed = p.loadImage('/assets/Penguin/crashed.gif');
+    this.sprites.default = p.loadImage(CONFIG.asset('/assets/Penguin/default.png'));
+    this.sprites.left    = p.loadImage(CONFIG.asset('/assets/Penguin/left.png'));
+    this.sprites.right   = p.loadImage(CONFIG.asset('/assets/Penguin/right.png'));
+    this.sprites.back    = p.loadImage(CONFIG.asset('/assets/Penguin/back.png'));
+    this.sprites.crashed = p.loadImage(CONFIG.asset('/assets/Penguin/crashed.gif'));
 
-    this.tubeSprites.default = p.loadImage('/assets/Tube/default.png');
-    this.tubeSprites.left    = p.loadImage('/assets/Tube/left.png');
-    this.tubeSprites.right   = p.loadImage('/assets/Tube/right.png');
-    this.tubeSprites.flipped = p.loadImage('/assets/Tube/flipped.png');
-    this.tubeSprites.shadow  = p.loadImage('/assets/Tube/shadow.png');
+    this.tubeSprites.default = p.loadImage(CONFIG.asset('/assets/Tube/default.png'));
+    this.tubeSprites.left    = p.loadImage(CONFIG.asset('/assets/Tube/left.png'));
+    this.tubeSprites.right   = p.loadImage(CONFIG.asset('/assets/Tube/right.png'));
+    this.tubeSprites.flipped = p.loadImage(CONFIG.asset('/assets/Tube/flipped.png'));
+    this.tubeSprites.shadow  = p.loadImage(CONFIG.asset('/assets/Tube/shadow.png'));
   }
 
   setStartPosition(playerIndex) {

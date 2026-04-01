@@ -10,9 +10,27 @@
 
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const PORT = 3000;
-const httpServer = createServer();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const PORT = process.env.PORT || 3000;
+const app = express();
+
+// Serve static built assets (no-cache for index to avoid stale bundles)
+const distPath = path.join(__dirname, 'dist');
+app.use(express.static(distPath, { maxAge: '1y', index: false }));
+
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/socket.io/')) return next();
+  res.setHeader('Cache-Control', 'no-store');
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
+const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: { origin: '*', methods: ['GET', 'POST'] },
 });

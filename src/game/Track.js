@@ -38,19 +38,19 @@ export class Track {
   preloadAssets(p) {
     // Hill tiles 0–20
     for (let i = 0; i <= 20; i++) {
-      this.tileImages[i] = p.loadImage(`/assets/HillTiles/${i}.png`);
+      this.tileImages[i] = p.loadImage(CONFIG.asset(`/assets/HillTiles/${i}.png`));
     }
-    this.tileImages['20_A'] = p.loadImage('/assets/HillTiles/20_A.png');
-    this.tileImages['Start'] = p.loadImage('/assets/HillTiles/Start.png');
-    this.tileImages['Finish'] = p.loadImage('/assets/HillTiles/Finish.png');
+    this.tileImages['20_A'] = p.loadImage(CONFIG.asset('/assets/HillTiles/20_A.png'));
+    this.tileImages['Start'] = p.loadImage(CONFIG.asset('/assets/HillTiles/Start.png'));
+    this.tileImages['Finish'] = p.loadImage(CONFIG.asset('/assets/HillTiles/Finish.png'));
 
-    this.bgImage = p.loadImage('/assets/Background.png');
-    this.cloudsImage = p.loadImage('/assets/Clouds.png');
-    this.finishLineImage = p.loadImage('/assets/FinishLine.png');
-    this.cornerImage = p.loadImage('/assets/MapCorner.png');
+    this.bgImage = p.loadImage(CONFIG.asset('/assets/Background.png'));
+    this.cloudsImage = p.loadImage(CONFIG.asset('/assets/Clouds.png'));
+    this.finishLineImage = p.loadImage(CONFIG.asset('/assets/FinishLine.png'));
+    this.cornerImage = p.loadImage(CONFIG.asset('/assets/MapCorner.png'));
 
-    this.clappingGifs[0] = p.loadImage('/assets/Clapping/1.gif');
-    this.clappingGifs[1] = p.loadImage('/assets/Clapping/2.gif');
+    this.clappingGifs[0] = p.loadImage(CONFIG.asset('/assets/Clapping/1.gif'));
+    this.clappingGifs[1] = p.loadImage(CONFIG.asset('/assets/Clapping/2.gif'));
   }
 
   /**

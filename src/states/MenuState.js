@@ -58,11 +58,11 @@ export class MenuState {
   }
 
   preloadAssets(p) {
-    if (!this.imgStartTile) this.imgStartTile = p.loadImage('/assets/HillTiles/Start.png');
-    if (!this.imgClap1) this.imgClap1 = p.loadImage('/assets/Clapping/1.gif');
-    if (!this.imgClap2) this.imgClap2 = p.loadImage('/assets/Clapping/2.gif');
-    if (!this.imgCrashed) this.imgCrashed = p.loadImage('/assets/Penguin/crashed.gif');
-    if (!this.imgTube) this.imgTube = p.loadImage('/assets/Tube/default.png');
+    if (!this.imgStartTile) this.imgStartTile = p.loadImage(CONFIG.asset('/assets/HillTiles/Start.png'));
+    if (!this.imgClap1) this.imgClap1 = p.loadImage(CONFIG.asset('/assets/Clapping/1.gif'));
+    if (!this.imgClap2) this.imgClap2 = p.loadImage(CONFIG.asset('/assets/Clapping/2.gif'));
+    if (!this.imgCrashed) this.imgCrashed = p.loadImage(CONFIG.asset('/assets/Penguin/crashed.gif'));
+    if (!this.imgTube) this.imgTube = p.loadImage(CONFIG.asset('/assets/Tube/default.png'));
   }
 
   enter(p) {

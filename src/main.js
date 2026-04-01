@@ -40,7 +40,7 @@ const sketch = (p) => {
 
   p.preload = () => {
     // Preload the authentic Sled Racing / Club Penguin TTF font globally
-    const bumbastika = p.loadFont('/assets/BUMBASTIKA.TTF');
+    const bumbastika = p.loadFont(CONFIG.asset('/assets/BUMBASTIKA.TTF'));
     CONFIG.FONT_HEADER = bumbastika;
     CONFIG.FONT_BODY = bumbastika;
     CONFIG.FONT_NUMBERS = 'Arial'; // Safe reliable fallback for unrenderable numbers

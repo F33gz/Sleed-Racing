@@ -1,3 +1,19 @@
+// Resolve base path for assets (Render serves at root; BASE_URL stays '/').
+const BASE_URL = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+
+const safeGet = (key) => {
+  try { return typeof localStorage !== 'undefined' ? localStorage.getItem(key) : null; }
+  catch (_) { return null; }
+};
+
+const runtimeServerUrl =
+  (typeof window !== 'undefined' ? safeGet('serverUrl') : null) ||
+  import.meta.env.VITE_SERVER_URL ||
+  (typeof window !== 'undefined' && window.location.port === '3000'
+    ? window.location.origin
+    : (import.meta.env.DEV
+        ? 'http://localhost:3000'
+        : (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')));
 /**
  * config.js — Single source of truth for ALL tunable game constants.
  *
@@ -24,7 +40,7 @@ export const CONFIG = {
   LANE_STEP_PX: 24,                  // Pixels per virtual lane (collision grid)
   LANE_STEP_Y: 16,                   // = 24 / 1.5 — vertical offset per lane step
   // ── Controls ──────────────────────────────────────────────────────────
-  CONTROL_MODE: localStorage.getItem('controlMode') || 'hands', // 'hands' or 'body'
+  CONTROL_MODE: safeGet('controlMode') || 'hands', // 'hands' or 'body'
 
   // ── HandPose ─────────────────────────────────────────────────────────
   HAND_SENSITIVITY: 1.0,             // Base multiplier for |Δy| → raw steering
@@ -72,7 +88,9 @@ export const CONFIG = {
   FINISH_DECAY_MAX: 0.935,          // Max deceleration after finish line
 
   // ── Network ──────────────────────────────────────────────────────────
-  SERVER_URL: `http://${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:3000`,
+  SERVER_URL: runtimeServerUrl,
+  ASSET_BASE: BASE_URL,
+  asset: (relativePath) => `${BASE_URL}${relativePath}`,
   POSITION_SYNC_RATE: 50,
 
   // ── UI / Fonts ───────────────────────────────────────────────────────

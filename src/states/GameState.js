@@ -185,7 +185,7 @@ export class GameState {
           this.startTime = Date.now();
 
           // Start the music exactly when the countdown hits GO!
-          this.music = new Audio('/assets/Music.mp3');
+          this.music = new Audio(CONFIG.asset('/assets/Music.mp3'));
           this.music.loop = true;
           this.music.volume = 0.4; // Soft background volume
           this.music.play().catch(e => console.warn('Audio auto-play prevented:', e));
@@ -260,7 +260,7 @@ export class GameState {
 
       // Play finish sound
       if (this.music) {
-        this.music.src = '/assets/Finish.mp3';
+        this.music.src = CONFIG.asset('/assets/Finish.mp3');
         this.music.loop = false;
         this.music.play().catch(e => console.warn('Finish audio skipped:', e));
       }
