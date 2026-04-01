@@ -14,6 +14,8 @@ export class PoseController {
     this.model = null; // Either handPose or bodyPose
     this.video = null;
     this.isReady = false;
+    this.preloadedMode = null;
+    this.preloadPromise = null;
     this.steeringX = 0;
     
     // Extracted data for HUD
@@ -27,11 +29,58 @@ export class PoseController {
    * Switch between hands and body modes on the fly.
    */
   async switchMode(p, newMode) {
-    if (this.mode === newMode && this.isReady) return;
+    if (this.mode === newMode) return;
     console.log(`[PoseController] Switching mode to: ${newMode}`);
-    this.stop();
+
+    // If tracker is not active, just persist mode and defer heavy init
+    // until GameState enters and calls init().
+    if (!this.isReady) {
+      this.mode = newMode;
+      if (this.preloadedMode !== newMode) {
+        this.model = null;
+        this.preloadedMode = null;
+      }
+      return;
+    }
+
+    if (this.model) this.model.detectStop?.();
+    this.resetData();
+    this.model = null;
+    this.preloadedMode = null;
+    this.isReady = false;
     this.mode = newMode;
     await this.init(p);
+  }
+
+  /**
+   * Preload model weights in the lobby without starting camera inference.
+   */
+  async preloadModel(mode = this.mode) {
+    if (typeof ml5 === 'undefined') return;
+    if (this.isReady) return;
+    if (this.model && this.preloadedMode === mode) return;
+
+    if (this.preloadPromise) {
+      await this.preloadPromise;
+      if (this.model && this.preloadedMode === mode) return;
+    }
+
+    this.preloadPromise = (async () => {
+      try {
+        if (mode === 'hands') {
+          this.model = await ml5.handPose({ maxHands: 2, flipped: true });
+        } else if (mode === 'body') {
+          this.model = await ml5.bodyPose({ flipped: true });
+        }
+        this.mode = mode;
+        this.preloadedMode = mode;
+      } catch (err) {
+        console.warn('[PoseController] Preload skipped:', err);
+      }
+    })();
+
+    await this.preloadPromise;
+    this.preloadPromise = null;
   }
 
   /**
@@ -41,6 +90,10 @@ export class PoseController {
     if (this.isReady) return;
 
     try {
+      if (this.preloadPromise) {
+        await this.preloadPromise;
+      }
+
       if (!this.video) {
         this.video = p.createCapture(p.VIDEO, { flipped: true });
         this.video.size(320, 240);
@@ -52,15 +105,21 @@ export class PoseController {
         return;
       }
 
+      if (!this.model || this.preloadedMode !== this.mode) {
+        if (this.mode === 'hands') {
+          this.model = await ml5.handPose({ maxHands: 2, flipped: true });
+        } else if (this.mode === 'body') {
+          this.model = await ml5.bodyPose({ flipped: true });
+        }
+        this.preloadedMode = this.mode;
+      }
+
       if (this.mode === 'hands') {
-        this.model = await ml5.handPose({ maxHands: 2, flipped: true });
         this.model.detectStart(this.video.elt, (results) => {
           this.processHands(results);
         });
         console.log('[PoseController] Initialised Mode: Controls Six/Seven (Hands)');
       } else if (this.mode === 'body') {
-        // Use bodyPose (MoveNet by default in ml5 v1)
-        this.model = await ml5.bodyPose({ flipped: true });
         this.model.detectStart(this.video.elt, (results) => {
           this.processBody(results);
         });
@@ -154,14 +213,17 @@ export class PoseController {
     return this.steeringX;
   }
 
-  stop() {
+  stop(removeVideo = true, clearModel = false) {
     if (this.model) this.model.detectStop?.();
-    if (this.video) {
+    if (removeVideo && this.video) {
         this.video.remove();
         this.video = null;
     }
     this.resetData();
-    this.model = null;
+    if (clearModel) {
+      this.model = null;
+      this.preloadedMode = null;
+    }
     this.isReady = false;
   }
 }

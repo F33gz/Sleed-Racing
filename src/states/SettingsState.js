@@ -45,7 +45,7 @@ export class SettingsState {
       label: this.getModeLabel(),
       x: cx, y: sy, w: 320, h: 52,
       fontSize: 12,
-      onClick: () => this.toggleMode(p),
+      onClick: () => this.toggleMode(),
     });
 
     this.backBtn = new Button({
@@ -60,7 +60,7 @@ export class SettingsState {
     return CONFIG.CONTROL_MODE === 'body' ? 'MODE KINECT BODY' : 'MODE HANDS CAMERA';
   }
 
-  toggleMode(p) {
+  toggleMode() {
     // Toggle
     CONFIG.CONTROL_MODE = CONFIG.CONTROL_MODE === 'hands' ? 'body' : 'hands';
     // Save to localStorage
@@ -69,11 +69,6 @@ export class SettingsState {
     // Update button text
     this.modeBtn.label = this.getModeLabel();
     this.savedTextTimer = 60; // show "Saved!" for ~1 second
-
-    // Re-init the controller if running
-    if (this.ctx.poseController) {
-      this.ctx.poseController.switchMode(p, CONFIG.CONTROL_MODE);
-    }
   }
 
   update(p, dt) {

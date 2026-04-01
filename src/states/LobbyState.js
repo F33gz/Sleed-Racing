@@ -42,6 +42,8 @@ export class LobbyState {
     this.serverConnected = false;
     this.statusMessage = 'Connecting to server...';
     this._p = null; // Store p5 ref for socket callbacks
+    this.preloadIdleId = null;
+    this.preloadTimeoutId = null;
   }
 
   enter(p, data = {}) {
@@ -58,6 +60,7 @@ export class LobbyState {
 
     this.snowflakes = Array.from({ length: 40 }, () => new Snowflake(p));
     this.buildUI(p);
+    this.schedulePoseWarmup();
 
     // Activate chat HTML input
     const canvas = document.querySelector('canvas');
@@ -130,6 +133,7 @@ export class LobbyState {
   }
 
   exit(p) {
+    this.cancelPoseWarmup();
     this.hideRenameBox();
     this.chatBox.deactivate();
     const sm = this.ctx.socketManager;
@@ -139,6 +143,34 @@ export class LobbyState {
     sm.off('lobby:update');
     sm.off('chat:message');
     sm.off('game:start');
+  }
+
+  schedulePoseWarmup() {
+    this.cancelPoseWarmup();
+
+    const warmup = () => {
+      const mode = CONFIG.CONTROL_MODE || 'hands';
+      this.ctx.poseController?.preloadModel(mode);
+    };
+
+    if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
+      this.preloadIdleId = window.requestIdleCallback(warmup, { timeout: 1500 });
+      return;
+    }
+
+    this.preloadTimeoutId = setTimeout(warmup, 500);
+  }
+
+  cancelPoseWarmup() {
+    if (typeof window !== 'undefined' && typeof window.cancelIdleCallback === 'function' && this.preloadIdleId !== null) {
+      window.cancelIdleCallback(this.preloadIdleId);
+      this.preloadIdleId = null;
+    }
+
+    if (this.preloadTimeoutId !== null) {
+      clearTimeout(this.preloadTimeoutId);
+      this.preloadTimeoutId = null;
+    }
   }
 
   buildUI(p) {

@@ -25,6 +25,7 @@ const runtimeServerUrl =
 export const CONFIG = {
   // ── Canvas ───────────────────────────────────────────────────────────
   ASPECT_RATIO: 1000 / 610,         // Original game: 1000×610
+  TARGET_FPS: 60,                   // Baseline used to scale frame-dependent legacy constants
 
   // ── Physics (from original Game.js) ──────────────────────────────────
   GRAVITY: 0.5,                      // Speed increment per frame until maxSpeed
@@ -57,6 +58,7 @@ export const CONFIG = {
   BODY_MAX_SPEED: 6.5,               // Max speed
   BODY_SMOOTHING: 0.25,              // Body is naturally smoother/slower, need less artificial lerp
   BODY_CURVE: 1.5,                   // Power curve
+  KEYBOARD_STEER_SPEED: 3.25,        // Approx half of hand/body max speed (px/frame at TARGET_FPS)
 
   // ── Tiles ────────────────────────────────────────────────────────────
   TILE_WIDTH: 249,                   // Each tile's horizontal span

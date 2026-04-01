@@ -174,6 +174,8 @@ export class GameState {
   // ── Frame update ───────────────────────────────────────────────────
 
   update(p, dt) {
+    const frameScale = (dt * CONFIG.TARGET_FPS);
+
     // Countdown phase (READY → SET → GO!)
     if (this.countdown > 0) {
       this.countdownTimer += dt;
@@ -223,7 +225,8 @@ export class GameState {
 
     // Smooth the input (lerp toward target)
     this._smoothedHandInput = (this._smoothedHandInput || 0);
-    this._smoothedHandInput += (hTarget - this._smoothedHandInput) * smoothFactor;
+    const inputAlpha = 1 - Math.pow(1 - smoothFactor, frameScale);
+    this._smoothedHandInput += (hTarget - this._smoothedHandInput) * inputAlpha;
 
     // If very small, snap to zero to avoid drift
     if (Math.abs(this._smoothedHandInput) < 0.05) this._smoothedHandInput = 0;
@@ -241,14 +244,12 @@ export class GameState {
     this.local.steer(hInput);
 
     // ── Move local player ────────────────────────────────────────────
-    const prevSpeed = this.local.speed;
-    this.local.update(this.track);
+    const movedY = this.local.update(this.track, dt);
 
     // ── Camera follows local player ──────────────────────────────────
-    const dist = this.local.speed;
-    this.camX -= dist * CONFIG.X_MULTIPLIER;
-    this.camY -= dist;
-    this.cloudsX -= dist / 15;
+    this.camX -= movedY * CONFIG.X_MULTIPLIER;
+    this.camY -= movedY;
+    this.cloudsX -= movedY / 15;
 
     // ── Tile collision check ─────────────────────────────────────────
     this.checkMap(this.local);
@@ -277,7 +278,7 @@ export class GameState {
     }
 
     // ── Remote players ───────────────────────────────────────────────
-    for (const r of this.remotes.values()) r.update(this.track);
+    for (const r of this.remotes.values()) r.update(this.track, dt);
 
     // ── Network sync ─────────────────────────────────────────────────
     this.syncTimer += dt;

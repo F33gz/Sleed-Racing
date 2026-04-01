@@ -128,20 +128,23 @@ export class Player {
   /**
    * Per-frame update.
    */
-  update(track) {
+  update(track, dt = 1 / CONFIG.TARGET_FPS) {
+    const frameScale = (dt * CONFIG.TARGET_FPS);
+
     if (!this.isLocal) {
-      this.left += (this.targetLeft - this.left) * this.lerpSpeed;
-      this.top += (this.targetTop - this.top) * this.lerpSpeed;
-      this.offsetX += (this.targetOffsetX - this.offsetX) * this.lerpSpeed;
+      const alpha = 1 - Math.pow(1 - this.lerpSpeed, frameScale);
+      this.left += (this.targetLeft - this.left) * alpha;
+      this.top += (this.targetTop - this.top) * alpha;
+      this.offsetX += (this.targetOffsetX - this.offsetX) * alpha;
       this.updateAbsolutePosition();
-      return;
+      return 0;
     }
 
     // ── Horizontal movement (free-form) ────────────────────────────
     if (this.hVel !== 0) {
       // Positive hVel means steering RIGHT. Steering right moves TOWARDS Lane 0.
       // So moving right DECREASES offsetX. Moving left INCREASES offsetX.
-      this.offsetX -= this.hVel;
+      this.offsetX -= this.hVel * frameScale;
       this.offsetX = Math.max(0, Math.min(this.offsetX, this.maxOffset));
 
       // Show turning sprite based on movement direction
@@ -175,15 +178,15 @@ export class Player {
       }
     }
     else if (this.crashed && this.crashState > 0) {
-      this.speed *= CONFIG.CRASH_DECAY;
+      this.speed *= Math.pow(CONFIG.CRASH_DECAY, frameScale);
       this.animateCrash();
     }
     else if (this.speed < CONFIG.MAX_SPEED) {
-      this.speed += CONFIG.GRAVITY;
+      this.speed += CONFIG.GRAVITY * frameScale;
       if (this.speed > CONFIG.MAX_SPEED) this.speed = CONFIG.MAX_SPEED;
     }
     else if (this.speed > CONFIG.MAX_SPEED) {
-      this.speed *= CONFIG.DECAY;
+      this.speed *= Math.pow(CONFIG.DECAY, frameScale);
       if (this.speed < CONFIG.MAX_SPEED) this.speed = CONFIG.MAX_SPEED;
     }
     else {
@@ -203,14 +206,17 @@ export class Player {
     }
 
     // Move downhill
-    this.left += effectiveSpeed * CONFIG.X_MULTIPLIER;
-    this.top += effectiveSpeed;
+    const movedY = effectiveSpeed * frameScale;
+    this.left += movedY * CONFIG.X_MULTIPLIER;
+    this.top += movedY;
     this.updateAbsolutePosition();
 
     // Jump animation
     if (this.jumping) {
       this.animateJump();
     }
+
+    return movedY;
   }
 
   // ── Triggers ──────────────────────────────────────────────────────
